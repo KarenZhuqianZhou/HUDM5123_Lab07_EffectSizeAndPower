@@ -1,0 +1,62 @@
+---
+title: "HUDM5123_Lab07_zz2404"
+author: "Zhuqian Karen Zhou"
+date: "May 5, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+load("acupuncture.Rdata")
+```
+
+# Task 1
+Convert Convert the sex variable into a factor that has levels male and female.
+```{r}
+acupuncture$sex_fac <- factor(x=acupuncture$sex,
+                              levels = c(0,1),
+                              labels = c("male", "female"))
+```
+
+# Task 2
+Assess if there is a sex effect on change in pain score from baseline to one year follow up. Only look for a main effect for sex, not an interaction with group.
+```{r}
+acupuncture$pk5_1 <- acupuncture$pk5 - acupuncture$pk1
+t.test(pk5_1 ~ sex_fac, data=acupuncture)
+```
+The result of Welch two sample t-test with unequal variance shows that there is no evidence for a significant main effect of sex on change in pain score, t(63.629)=0.703, p=0.48.
+
+# TASK 3
+Calculate and interpret Cohen’s d for the relationship of sex on change in pain rating. (Do this whether or not the relationship is significant.)
+```{r}
+library(effsize)
+cohen.d(pk5_1~sex_fac, data=acupuncture, pooled=TRUE)
+```
+The Cohen's d for the relationship of sex on change in pain rating, 0.116, is small than 0.2, which means the effect of sex on change in pain rating is negligible.
+
+# TASK 4
+Calculate and interpret complete eta squared for the relationship of sex on change in pain. (Do this whether or not the relationship is significant.)
+```{r}
+lm <- lm(formula = pk5_1 ~ sex_fac, data=acupuncture)
+anova(lm)
+(c.eta.sq <- 76/(76+41984))
+```
+The complete eta-squared for the relationship of sex on change in pain is .002, which means only 0.2% change in pain can be explained by sex. Therefore, the effect of sex on change in pain is very small.
+
+# TASK 5
+Suppose this was a pilot study to generate effect size estimates for the relationship between participant sex and change in pain. Use the estimate of Cohen’s d to calculate the sample size needed to detect the effect with alpha = .05 and for power = .8 in a two-sample design based on the two-sample t test.
+```{r}
+library(pwr)
+pwr.t.test(d=0.1157781, sig.level=.05, power=.8)
+```
+The two-sample t test shows that the sample size needed to detect the effect with alpha = .05 and for power = .8 is 1173.
+
+# TASK 6
+Do the same sample size calculation for eta squared using an ANOVA design.
+```{r}
+pwr.anova.test(k=2,f=(0.001806942^2/(1-0.001806942)^2)^0.5,sig.level=.05,power=.8)
+```
+The ANOVA design above shows that the sample size needed to detect the effect with alpha = .05 and for power = .8 is 1197615.
